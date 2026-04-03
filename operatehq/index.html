@@ -501,8 +501,15 @@ Return ONLY valid JSON, no markdown, no extra text:
       })
     });
     const data=await res.json();
+    console.log('Proxy response status:', res.status);
+    console.log('Proxy response data:', JSON.stringify(data).substring(0,500));
+    if(data.error){throw new Error('API error: '+data.error);}
     let raw=(data.content?.[0]?.text||'').replace(/```json|```/g,'').trim();
-    try{diag=JSON.parse(raw);}catch(e){diag={parseError:true,raw};}
+    console.log('Raw text length:', raw.length, 'Preview:', raw.substring(0,200));
+    try{diag=JSON.parse(raw);}catch(e){
+      console.error('JSON parse error:', e.message);
+      diag={parseError:true,raw:raw||JSON.stringify(data)};
+    }
     document.getElementById('st7').className='sstep done';
     setTimeout(()=>{buildReview();go(4);},1200);
   }catch(err){
